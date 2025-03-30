@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from '@/components/Header';
 import AlertBanner from '@/components/AlertBanner';
 import DisruptionSimulator from '@/components/DisruptionSimulator';
-import PDFAnalyzer from '@/components/PDFAnalyzer';
+import DocumentAnalyzer from '@/components/DocumentAnalyzer';
 import LogisticsChart from '@/components/LogisticsChart';
 import CROEnrollmentChart from '@/components/CROEnrollmentChart';
 import ProtocolOptimizationChart from '@/components/ProtocolOptimizationChart';
@@ -13,6 +13,7 @@ import PatientJourneyVisualizer from '@/components/PatientJourneyVisualizer';
 import DisruptionLog from '@/components/DisruptionLog';
 import MapVisualization from '@/components/MapVisualization';
 import RegulatoryBarriers from '@/components/RegulatoryBarriers';
+import ProtocolAnalysisVisualizer from '@/components/ProtocolAnalysisVisualizer';
 
 import {
   simulateDisruption, 
@@ -35,7 +36,9 @@ import {
   EnrollmentData, 
   ProtocolData, 
   DisruptionLogEntry,
-  RegulatoryData
+  RegulatoryData,
+  ProtocolAnalysisResult,
+  RiskAssessment
 } from '@/types/synergia';
 
 const Index = () => {
@@ -49,6 +52,8 @@ const Index = () => {
   const [protocolData, setProtocolData] = useState<ProtocolData[]>([]);
   const [disruptionLog, setDisruptionLog] = useState<DisruptionLogEntry[]>([]);
   const [regulatoryData, setRegulatoryData] = useState<RegulatoryData[]>([]);
+  const [protocolAnalysis, setProtocolAnalysis] = useState<ProtocolAnalysisResult | null>(null);
+  const [riskAssessment, setRiskAssessment] = useState<RiskAssessment | null>(null);
   
   const [loadingPatients, setLoadingPatients] = useState(true);
   const [loadingReasoning, setLoadingReasoning] = useState(false);
@@ -127,6 +132,14 @@ const Index = () => {
     }
   };
 
+  const handleProtocolAnalysisGenerated = (analysis: ProtocolAnalysisResult) => {
+    setProtocolAnalysis(analysis);
+  };
+
+  const handleRiskAssessmentGenerated = (assessment: RiskAssessment) => {
+    setRiskAssessment(assessment);
+  };
+
   const handleDismissAlert = () => {
     setTrigger(null);
   };
@@ -147,6 +160,7 @@ const Index = () => {
                 <TabsTrigger value="logistics">Logistics</TabsTrigger>
                 <TabsTrigger value="cro">CRO</TabsTrigger>
                 <TabsTrigger value="protocol">Protocol</TabsTrigger>
+                <TabsTrigger value="protocol-analysis">Protocol Analysis</TabsTrigger>
                 <TabsTrigger value="regulatory">Regulatory</TabsTrigger>
                 <TabsTrigger value="ai-reasoning">AI Reasoning</TabsTrigger>
               </TabsList>
@@ -171,6 +185,10 @@ const Index = () => {
                 <ProtocolOptimizationChart data={protocolData} />
               </TabsContent>
               
+              <TabsContent value="protocol-analysis" className="mt-0">
+                <ProtocolAnalysisVisualizer data={protocolAnalysis} />
+              </TabsContent>
+              
               <TabsContent value="regulatory" className="mt-0">
                 <RegulatoryBarriers data={regulatoryData} isLoading={loadingRegulatory} />
               </TabsContent>
@@ -182,7 +200,11 @@ const Index = () => {
           </div>
           
           <div className="space-y-6">
-            <PDFAnalyzer onSimulationGenerated={handleSimulateDisruption} />
+            <DocumentAnalyzer 
+              onSimulationGenerated={handleSimulateDisruption}
+              onProtocolAnalysisGenerated={handleProtocolAnalysisGenerated}
+              onRiskAssessmentGenerated={handleRiskAssessmentGenerated}
+            />
             <DisruptionSimulator onSimulate={handleSimulateDisruption} isLoading={isSimulating} />
             <DisruptionLog entries={disruptionLog} isLoading={loadingLog} />
           </div>

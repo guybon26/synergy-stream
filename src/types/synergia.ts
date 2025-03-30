@@ -1,4 +1,3 @@
-
 export interface TriggerResponse {
   triggerId: string;
   message: string;
@@ -97,4 +96,51 @@ export interface RegulatoryData {
   dueDate: string;
   description: string;
   impact: 'low' | 'medium' | 'high';
+}
+
+export interface ProtocolAnalysisResult {
+  logistics: {
+    supplyRequirements: string[];
+    storageConditions: string;
+    distributionChallenges: string[];
+    estimatedDemand: {
+      high: boolean;
+      estimate: string;
+    };
+  };
+  cro: {
+    visitSchedule: {
+      visitCount: number;
+      durationWeeks: number;
+      complexity: number;
+    };
+    procedureComplexity: number;
+    staffingRequirements: {
+      staff: string[];
+      complexity: number;
+    };
+    patientBurden: number;
+  };
+  protocolChallenges: string[];
+  complexity: number;
+}
+
+export interface Risk {
+  category: string;
+  description: string;
+  severity: 'low' | 'medium' | 'high';
+  probability: 'low' | 'medium' | 'high';
+  impact: string;
+  mitigation: string;
+}
+
+export interface RiskAssessment {
+  logistics: Risk[];
+  cro: Risk[];
+  regulatory: Risk[];
+  overall: {
+    riskScore: number;
+    summary: string;
+    mitigationStrategies: string[];
+  };
 }

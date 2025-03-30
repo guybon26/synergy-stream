@@ -1,16 +1,15 @@
-
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from '@/components/Header';
 import AlertBanner from '@/components/AlertBanner';
 import DisruptionSimulator from '@/components/DisruptionSimulator';
+import PDFAnalyzer from '@/components/PDFAnalyzer';
 import LogisticsChart from '@/components/LogisticsChart';
 import CROEnrollmentChart from '@/components/CROEnrollmentChart';
 import ProtocolOptimizationChart from '@/components/ProtocolOptimizationChart';
 import AIReasoningTree from '@/components/AIReasoningTree';
 import PatientJourneyVisualizer from '@/components/PatientJourneyVisualizer';
 import DisruptionLog from '@/components/DisruptionLog';
-import { Users } from 'lucide-react';
 
 import {
   simulateDisruption, 
@@ -52,7 +51,6 @@ const Index = () => {
   const [loadingProtocol, setLoadingProtocol] = useState(true);
   const [loadingLog, setLoadingLog] = useState(true);
 
-  // Initial data loading
   useEffect(() => {
     const loadInitialData = async () => {
       try {
@@ -91,7 +89,6 @@ const Index = () => {
       const response = await simulateDisruption(params);
       setTrigger(response);
       
-      // Update patient journey with delay flags
       const updatedPatients = updatePatientJourneys(
         patients, 
         response.triggerId, 
@@ -99,11 +96,9 @@ const Index = () => {
       );
       setPatients(updatedPatients);
       
-      // Fetch reasoning steps
       const reasoningData = await getReasoningSteps(response.triggerId);
       setReasoningSteps(reasoningData);
       
-      // Add to disruption log
       const newLogEntry: DisruptionLogEntry = {
         id: `LOG${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`,
         timestamp: new Date().toISOString(),
@@ -167,6 +162,7 @@ const Index = () => {
           </div>
           
           <div className="space-y-6">
+            <PDFAnalyzer onSimulationGenerated={handleSimulateDisruption} />
             <DisruptionSimulator onSimulate={handleSimulateDisruption} isLoading={isSimulating} />
             <DisruptionLog entries={disruptionLog} isLoading={loadingLog} />
           </div>

@@ -1,4 +1,3 @@
-
 import { TriggerResponse, DisruptionSimulationParams, PatientJourney, ReasoningStep, LogisticsData, EnrollmentData, ProtocolData, DisruptionLogEntry } from '../types/synergia';
 
 // Mock data and API responses
@@ -99,7 +98,8 @@ const mockDisruptionLog: DisruptionLogEntry[] = [
   }
 ];
 
-const mockReasoningSteps: ReasoningStep[] = {
+// Fix for the ReasoningStep mock data
+const mockReasoningSteps: ReasoningStep = {
   id: 'step-1',
   title: 'Analyze Initial Disruption',
   description: 'Evaluating the impact of Site 2 IMP delay on patient visits',

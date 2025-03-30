@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Activity, BrainCircuit, FileText, Search } from 'lucide-react';
+import { Activity, BrainCircuit, FileText, Search, Map } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Header = () => {
@@ -22,6 +22,11 @@ const Header = () => {
         <Button variant="outline" size="sm" className="text-xs">
           <Search size={14} className="mr-1" />
           Search Trials
+        </Button>
+        
+        <Button variant="outline" size="sm" className="text-xs">
+          <Map size={14} className="mr-1" />
+          Global Sites
         </Button>
         
         <Button variant="outline" size="sm" className="text-xs">

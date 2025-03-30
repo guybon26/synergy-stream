@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from '@/components/Header';
@@ -10,6 +11,7 @@ import ProtocolOptimizationChart from '@/components/ProtocolOptimizationChart';
 import AIReasoningTree from '@/components/AIReasoningTree';
 import PatientJourneyVisualizer from '@/components/PatientJourneyVisualizer';
 import DisruptionLog from '@/components/DisruptionLog';
+import MapVisualization from '@/components/MapVisualization';
 
 import {
   simulateDisruption, 
@@ -133,6 +135,7 @@ const Index = () => {
             <Tabs defaultValue="patient-journey" className="w-full">
               <TabsList className="mb-4">
                 <TabsTrigger value="patient-journey">Patient Journey</TabsTrigger>
+                <TabsTrigger value="map">Site Map</TabsTrigger>
                 <TabsTrigger value="logistics">Logistics</TabsTrigger>
                 <TabsTrigger value="cro">CRO</TabsTrigger>
                 <TabsTrigger value="protocol">Protocol</TabsTrigger>
@@ -141,6 +144,10 @@ const Index = () => {
               
               <TabsContent value="patient-journey" className="mt-0">
                 <PatientJourneyVisualizer patients={patients} isLoading={loadingPatients} />
+              </TabsContent>
+
+              <TabsContent value="map" className="mt-0">
+                <MapVisualization logisticsData={logisticsData} isLoading={loadingLogistics} />
               </TabsContent>
               
               <TabsContent value="logistics" className="mt-0">

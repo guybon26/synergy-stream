@@ -29,7 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { 
-  Law, 
+  Scale, 
   Flag, 
   ShieldAlert, 
   Shield
@@ -180,13 +180,13 @@ const RegulatoryBarriers: React.FC<RegulatoryBarriersProps> = ({
       case 'documentation':
         return <Flag className="h-4 w-4 text-blue-500" />;
       case 'approval':
-        return <Law className="h-4 w-4 text-purple-500" />;
+        return <Scale className="h-4 w-4 text-purple-500" />;
       case 'inspection':
         return <ShieldAlert className="h-4 w-4 text-yellow-500" />;
       case 'reporting':
         return <Shield className="h-4 w-4 text-green-500" />;
       default:
-        return <Law className="h-4 w-4" />;
+        return <Scale className="h-4 w-4" />;
     }
   };
   
@@ -209,7 +209,7 @@ const RegulatoryBarriers: React.FC<RegulatoryBarriersProps> = ({
       <CardHeader className="pb-2">
         <div className="flex justify-between items-center">
           <CardTitle className="text-xl font-semibold flex items-center">
-            <Law className="mr-2 text-synergia-600" size={20} />
+            <Scale className="mr-2 text-synergia-600" size={20} />
             Regulatory Barriers
           </CardTitle>
           

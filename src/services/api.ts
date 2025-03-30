@@ -149,7 +149,7 @@ const mockReasoningSteps: ReasoningStep = {
 };
 
 // Sample regulatory data for testing
-const sampleRegulatoryData = [
+const sampleRegulatoryData: RegulatoryData[] = [
   {
     id: "REG001",
     siteId: "SITE001",

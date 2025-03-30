@@ -12,6 +12,7 @@ import AIReasoningTree from '@/components/AIReasoningTree';
 import PatientJourneyVisualizer from '@/components/PatientJourneyVisualizer';
 import DisruptionLog from '@/components/DisruptionLog';
 import MapVisualization from '@/components/MapVisualization';
+import RegulatoryBarriers from '@/components/RegulatoryBarriers';
 
 import {
   simulateDisruption, 
@@ -21,7 +22,8 @@ import {
   getEnrollmentData, 
   getProtocolData, 
   getDisruptionLog,
-  updatePatientJourneys
+  updatePatientJourneys,
+  getRegulatoryData
 } from '@/services/api';
 
 import { 
@@ -32,7 +34,8 @@ import {
   LogisticsData, 
   EnrollmentData, 
   ProtocolData, 
-  DisruptionLogEntry 
+  DisruptionLogEntry,
+  RegulatoryData
 } from '@/types/synergia';
 
 const Index = () => {
@@ -45,6 +48,7 @@ const Index = () => {
   const [enrollmentData, setEnrollmentData] = useState<EnrollmentData[]>([]);
   const [protocolData, setProtocolData] = useState<ProtocolData[]>([]);
   const [disruptionLog, setDisruptionLog] = useState<DisruptionLogEntry[]>([]);
+  const [regulatoryData, setRegulatoryData] = useState<RegulatoryData[]>([]);
   
   const [loadingPatients, setLoadingPatients] = useState(true);
   const [loadingReasoning, setLoadingReasoning] = useState(false);
@@ -52,16 +56,18 @@ const Index = () => {
   const [loadingEnrollment, setLoadingEnrollment] = useState(true);
   const [loadingProtocol, setLoadingProtocol] = useState(true);
   const [loadingLog, setLoadingLog] = useState(true);
+  const [loadingRegulatory, setLoadingRegulatory] = useState(true);
 
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        const [patientData, logisticsResult, enrollmentResult, protocolResult, logResult] = await Promise.all([
+        const [patientData, logisticsResult, enrollmentResult, protocolResult, logResult, regulatoryResult] = await Promise.all([
           getPatientJourneys(),
           getLogisticsData(),
           getEnrollmentData(),
           getProtocolData(),
-          getDisruptionLog()
+          getDisruptionLog(),
+          getRegulatoryData()
         ]);
         
         setPatients(patientData);
@@ -69,6 +75,7 @@ const Index = () => {
         setEnrollmentData(enrollmentResult);
         setProtocolData(protocolResult);
         setDisruptionLog(logResult);
+        setRegulatoryData(regulatoryResult);
       } catch (error) {
         console.error('Error loading initial data:', error);
       } finally {
@@ -77,6 +84,7 @@ const Index = () => {
         setLoadingEnrollment(false);
         setLoadingProtocol(false);
         setLoadingLog(false);
+        setLoadingRegulatory(false);
       }
     };
     
@@ -139,6 +147,7 @@ const Index = () => {
                 <TabsTrigger value="logistics">Logistics</TabsTrigger>
                 <TabsTrigger value="cro">CRO</TabsTrigger>
                 <TabsTrigger value="protocol">Protocol</TabsTrigger>
+                <TabsTrigger value="regulatory">Regulatory</TabsTrigger>
                 <TabsTrigger value="ai-reasoning">AI Reasoning</TabsTrigger>
               </TabsList>
               
@@ -160,6 +169,10 @@ const Index = () => {
               
               <TabsContent value="protocol" className="mt-0">
                 <ProtocolOptimizationChart data={protocolData} />
+              </TabsContent>
+              
+              <TabsContent value="regulatory" className="mt-0">
+                <RegulatoryBarriers data={regulatoryData} isLoading={loadingRegulatory} />
               </TabsContent>
               
               <TabsContent value="ai-reasoning" className="mt-0">

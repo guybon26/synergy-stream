@@ -84,3 +84,17 @@ export interface DisruptionLogEntry {
   severity: string;
   resolved: boolean;
 }
+
+export interface RegulatoryData {
+  id: string;
+  siteId: string;
+  country: string;
+  region: string;
+  regulatoryBody: string;
+  requirementType: 'documentation' | 'approval' | 'inspection' | 'reporting';
+  stage: 'screening' | 'enrollment' | 'treatment' | 'follow-up' | 'close-out';
+  status: 'compliant' | 'at-risk' | 'non-compliant' | 'pending';
+  dueDate: string;
+  description: string;
+  impact: 'low' | 'medium' | 'high';
+}

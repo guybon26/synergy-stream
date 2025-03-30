@@ -148,6 +148,97 @@ const mockReasoningSteps: ReasoningStep = {
   ]
 };
 
+// Sample regulatory data for testing
+const sampleRegulatoryData = [
+  {
+    id: "REG001",
+    siteId: "SITE001",
+    country: "United States",
+    region: "Northeast",
+    regulatoryBody: "FDA",
+    requirementType: "approval",
+    stage: "enrollment",
+    status: "compliant",
+    dueDate: "2023-12-15",
+    description: "IND approval required before patient enrollment",
+    impact: "high"
+  },
+  {
+    id: "REG002",
+    siteId: "SITE002",
+    country: "United States",
+    region: "West",
+    regulatoryBody: "FDA",
+    requirementType: "documentation",
+    stage: "screening",
+    status: "at-risk",
+    dueDate: "2023-11-30",
+    description: "Protocol amendments need IRB review",
+    impact: "medium"
+  },
+  {
+    id: "REG003",
+    siteId: "SITE003",
+    country: "United States",
+    region: "Midwest",
+    regulatoryBody: "IRB",
+    requirementType: "reporting",
+    stage: "treatment",
+    status: "non-compliant",
+    dueDate: "2023-10-25",
+    description: "SAE reporting requirements not met",
+    impact: "high"
+  },
+  {
+    id: "REG004",
+    siteId: "SITE004",
+    country: "United States",
+    region: "South",
+    regulatoryBody: "FDA",
+    requirementType: "inspection",
+    stage: "follow-up",
+    status: "pending",
+    dueDate: "2023-12-10",
+    description: "Site inspection scheduled",
+    impact: "medium"
+  },
+  {
+    id: "REG005",
+    siteId: "SITE005",
+    country: "United States",
+    region: "Northeast",
+    regulatoryBody: "IRB",
+    requirementType: "documentation",
+    stage: "close-out",
+    status: "compliant",
+    dueDate: "2024-01-15",
+    description: "Final study report submission",
+    impact: "low"
+  },
+  {
+    id: "REG006",
+    siteId: "SITE002",
+    country: "United States",
+    region: "West",
+    regulatoryBody: "FDA",
+    requirementType: "approval",
+    stage: "treatment",
+    status: "at-risk",
+    dueDate: "2023-11-05",
+    description: "Protocol deviation approval required",
+    impact: "high"
+  }
+];
+
+// Function to get regulatory data
+export const getRegulatoryData = async () => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  // In a real application, this would be an API call to fetch data
+  return sampleRegulatoryData;
+};
+
 // Mock API functions
 export const simulateDisruption = async (params: DisruptionSimulationParams): Promise<TriggerResponse> => {
   // Simulate API call

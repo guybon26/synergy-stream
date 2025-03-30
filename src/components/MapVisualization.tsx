@@ -7,12 +7,12 @@ import { Layers, MapPin, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { LogisticsData } from '@/types/synergia';
 
-// Sample site location data
+// Sample site location data with properly typed coordinates
 const sitesData = [
   { 
     id: 'SITE001', 
     name: 'Northeast Medical Center', 
-    location: [-73.9857, 40.7484], // NYC
+    location: [-73.9857, 40.7484] as [number, number], // NYC
     status: 'active',
     patients: 32,
     inventory: 'ok'
@@ -20,7 +20,7 @@ const sitesData = [
   { 
     id: 'SITE002', 
     name: 'Pacific Research Institute', 
-    location: [-122.4194, 37.7749], // San Francisco
+    location: [-122.4194, 37.7749] as [number, number], // San Francisco
     status: 'warning',
     patients: 28,
     inventory: 'critical'
@@ -28,7 +28,7 @@ const sitesData = [
   { 
     id: 'SITE003', 
     name: 'Midwest Clinical Center', 
-    location: [-87.6298, 41.8781], // Chicago
+    location: [-87.6298, 41.8781] as [number, number], // Chicago
     status: 'active',
     patients: 41,
     inventory: 'warning'
@@ -36,7 +36,7 @@ const sitesData = [
   { 
     id: 'SITE004', 
     name: 'Southern Medical Research', 
-    location: [-95.3698, 29.7604], // Houston
+    location: [-95.3698, 29.7604] as [number, number], // Houston
     status: 'active',
     patients: 23,
     inventory: 'ok'
@@ -44,7 +44,7 @@ const sitesData = [
   { 
     id: 'SITE005', 
     name: 'Capital Region Hospital', 
-    location: [-77.0369, 38.9072], // Washington DC
+    location: [-77.0369, 38.9072] as [number, number], // Washington DC
     status: 'active',
     patients: 35,
     inventory: 'ok'
@@ -151,7 +151,7 @@ const MapVisualization: React.FC<MapVisualizationProps> = ({
             </div>
           `);
 
-        // Add marker to map
+        // Add marker to map with properly typed location
         new mapboxgl.Marker(el)
           .setLngLat(site.location)
           .setPopup(popup)

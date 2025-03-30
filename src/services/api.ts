@@ -1,4 +1,4 @@
-import { TriggerResponse, DisruptionSimulationParams, PatientJourney, ReasoningStep, LogisticsData, EnrollmentData, ProtocolData, DisruptionLogEntry } from '../types/synergia';
+import { TriggerResponse, DisruptionSimulationParams, PatientJourney, ReasoningStep, LogisticsData, EnrollmentData, ProtocolData, DisruptionLogEntry, RegulatoryData } from '../types/synergia';
 
 // Mock data and API responses
 const mockPatientJourneys: PatientJourney[] = [

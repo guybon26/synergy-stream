@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { FileText, Upload, AlertCircle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +23,7 @@ const DocumentAnalyzer: React.FC<DocumentAnalyzerProps> = ({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<MultiDocumentAnalysisResult | null>(null);
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
@@ -42,6 +44,12 @@ const DocumentAnalyzer: React.FC<DocumentAnalyzerProps> = ({
     const newFiles = [...files];
     newFiles.splice(index, 1);
     setFiles(newFiles);
+  };
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
 
   const handleAnalyzeDocuments = async () => {
@@ -125,13 +133,16 @@ const DocumentAnalyzer: React.FC<DocumentAnalyzerProps> = ({
           <div className="text-center space-y-4">
             <FileText size={36} className="text-gray-400" />
             <p className="text-sm text-gray-500">Drag & drop files here or click to browse</p>
-            <label htmlFor="document-upload">
-              <Button variant="outline" className="cursor-pointer">
-                <Upload size={16} className="mr-2" />
-                Select Files
-              </Button>
-            </label>
+            <Button 
+              variant="outline" 
+              className="cursor-pointer"
+              onClick={triggerFileInput}
+            >
+              <Upload size={16} className="mr-2" />
+              Select Files
+            </Button>
             <input
+              ref={fileInputRef}
               id="document-upload"
               type="file"
               multiple

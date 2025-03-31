@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { FileText, Upload, AlertCircle } from 'lucide-react';
 import { analyzePDF } from '@/services/pdfAnalysis';
@@ -15,11 +15,18 @@ const PDFAnalyzer: React.FC<PDFAnalyzerProps> = ({ onSimulationGenerated }) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [extractedText, setExtractedText] = useState<string>('');
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
       setExtractedText('');
+    }
+  };
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
   };
 
@@ -86,17 +93,16 @@ const PDFAnalyzer: React.FC<PDFAnalyzerProps> = ({ onSimulationGenerated }) => {
             <>
               <FileText size={36} className="text-gray-400 mb-2" />
               <p className="text-sm text-gray-500 mb-4">Upload a clinical trial protocol PDF</p>
-              <label htmlFor="pdf-upload">
-                <Button 
-                  variant="outline" 
-                  className="cursor-pointer"
-                  onClick={() => document.getElementById('pdf-upload')?.click()}
-                >
-                  <Upload size={16} className="mr-2" />
-                  Browse Files
-                </Button>
-              </label>
+              <Button 
+                variant="outline" 
+                className="cursor-pointer"
+                onClick={triggerFileInput}
+              >
+                <Upload size={16} className="mr-2" />
+                Browse Files
+              </Button>
               <input 
+                ref={fileInputRef}
                 id="pdf-upload"
                 type="file" 
                 accept=".pdf" 

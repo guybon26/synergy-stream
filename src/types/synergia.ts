@@ -1,3 +1,4 @@
+
 export interface TriggerResponse {
   triggerId: string;
   message: string;
@@ -142,5 +143,30 @@ export interface RiskAssessment {
     riskScore: number;
     summary: string;
     mitigationStrategies: string[];
+  };
+}
+
+export interface DocumentSource {
+  fileName: string;
+  fileType: 'pdf' | 'excel' | 'word' | 'unknown';
+  fileSize: number;
+  extractedContent: string;
+  sectorInsights: {
+    logistics?: string[];
+    cro?: string[];
+    regulatory?: string[];
+  };
+}
+
+export interface MultiDocumentAnalysisResult {
+  combinedSimulationParams: DisruptionSimulationParams;
+  protocolAnalysis: ProtocolAnalysisResult;
+  riskAssessment: RiskAssessment;
+  sources: DocumentSource[];
+  keywords: {
+    sites: string[];
+    products: string[];
+    dates: string[];
+    procedures: string[];
   };
 }

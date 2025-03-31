@@ -1,7 +1,5 @@
-
-import { DisruptionSimulationParams } from '@/types/synergia';
+import { DisruptionSimulationParams, MultiDocumentAnalysisResult, ProtocolAnalysisResult, RiskAssessment, DocumentSource } from '@/types/synergia';
 import * as pdfjs from 'pdfjs-dist';
-import { ProtocolAnalysisResult, RiskAssessment } from '@/types/synergia';
 
 // Configure PDF.js worker
 const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.entry');
@@ -21,7 +19,159 @@ export interface DocumentAnalysisResult {
 }
 
 /**
- * Analyzes a document file to extract clinical trial information
+ * Analyzes multiple document files to extract and combine clinical trial information
+ */
+export async function analyzeMultipleDocuments(files: File[]): Promise<MultiDocumentAnalysisResult> {
+  try {
+    if (!files.length) {
+      throw new Error('No files provided for analysis');
+    }
+    
+    // Process each file to extract text
+    const documentSources: DocumentSource[] = [];
+    const combinedText: string[] = [];
+    
+    for (const file of files) {
+      const fileType = getFileType(file);
+      let extractedText = '';
+      
+      // Extract text based on file type
+      if (fileType === 'pdf') {
+        extractedText = await extractPdfText(file);
+      } else if (fileType === 'excel') {
+        extractedText = await mockExcelExtraction(file);
+      } else if (fileType === 'word') {
+        extractedText = await mockWordExtraction(file);
+      } else {
+        extractedText = `Unsupported file type: ${file.name}`;
+      }
+      
+      combinedText.push(extractedText);
+      
+      // Create document source object
+      const source: DocumentSource = {
+        fileName: file.name,
+        fileType: fileType !== 'unknown' ? fileType : 'unknown',
+        fileSize: file.size,
+        extractedContent: extractedText.substring(0, 500) + '...',
+        sectorInsights: extractSectorInsights(extractedText)
+      };
+      
+      documentSources.push(source);
+    }
+    
+    // Combine all text for analysis
+    const mergedText = combinedText.join('\n\n');
+    
+    // Extract key information
+    const keywords = extractKeywords(mergedText);
+    
+    // Analyze the protocol
+    const protocolAnalysis = analyzeProtocol(mergedText, keywords);
+    
+    // Generate risk assessment
+    const riskAssessment = assessRisks(protocolAnalysis, keywords);
+    
+    // Generate simulation parameters
+    const combinedSimulationParams = analyzeTrialText(mergedText);
+    
+    return {
+      combinedSimulationParams,
+      protocolAnalysis,
+      riskAssessment,
+      sources: documentSources,
+      keywords
+    };
+  } catch (error) {
+    console.error('Error analyzing documents:', error);
+    throw new Error(`Failed to analyze documents: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
+ * Extract insights specific to different sectors (logistics, CRO, regulatory)
+ */
+function extractSectorInsights(text: string): { logistics?: string[], cro?: string[], regulatory?: string[] } {
+  const insights: { logistics?: string[], cro?: string[], regulatory?: string[] } = {};
+  
+  // Logistics insights
+  const logisticsInsights: string[] = [];
+  if (text.match(/supply|storage|temperature|shipment|distribution|inventory/gi)) {
+    if (text.match(/cold\s+chain|refrigerat|2-8°C|2-8\s*C|frozen/i)) {
+      logisticsInsights.push('Requires temperature-controlled storage');
+    }
+    
+    if (text.match(/limited\s+shelf\s+life|expir|stability/i)) {
+      logisticsInsights.push('Products have limited shelf life concerns');
+    }
+    
+    if (text.match(/international|import|export|customs/i)) {
+      logisticsInsights.push('International distribution requirements');
+    }
+    
+    if (text.match(/site\s+inventory|site\s+storage|depot/i)) {
+      logisticsInsights.push('Site inventory management needed');
+    }
+  }
+  
+  if (logisticsInsights.length > 0) {
+    insights.logistics = logisticsInsights;
+  }
+  
+  // CRO insights
+  const croInsights: string[] = [];
+  if (text.match(/visit|patient|enrollment|screening|baseline|follow-up/gi)) {
+    if (text.match(/visit\s+schedule|visit\s+frequency/i)) {
+      croInsights.push('Complex visit schedule identified');
+    }
+    
+    if (text.match(/recruitment|enrollment\s+rate|screening\s+rate/i)) {
+      croInsights.push('Enrollment rate considerations');
+    }
+    
+    if (text.match(/site\s+selection|site\s+activation/i)) {
+      croInsights.push('Site selection/activation strategy needed');
+    }
+    
+    if (text.match(/protocol\s+amendment|protocol\s+change/i)) {
+      croInsights.push('Protocol amendments may be required');
+    }
+  }
+  
+  if (croInsights.length > 0) {
+    insights.cro = croInsights;
+  }
+  
+  // Regulatory insights
+  const regulatoryInsights: string[] = [];
+  if (text.match(/regulatory|approval|compliance|authority|ethics\s+committee|irb/gi)) {
+    if (text.match(/ethics\s+committee|irb|institutional\s+review\s+board/i)) {
+      regulatoryInsights.push('Ethics committee/IRB approvals required');
+    }
+    
+    if (text.match(/safety\s+reporting|adverse\s+event|serious\s+adverse\s+event|sae|ae/i)) {
+      regulatoryInsights.push('Safety reporting requirements');
+    }
+    
+    if (text.match(/informed\s+consent|patient\s+consent/i)) {
+      regulatoryInsights.push('Informed consent documentation needed');
+    }
+    
+    if (text.match(/protocol\s+deviation|protocol\s+violation/i)) {
+      regulatoryInsights.push('Protocol deviation handling procedures');
+    }
+  }
+  
+  if (regulatoryInsights.length > 0) {
+    insights.regulatory = regulatoryInsights;
+  }
+  
+  return insights;
+}
+
+/**
+ * Analyzes a single document file to extract clinical trial information
+ * (Keeping for backward compatibility)
  */
 export async function analyzeDocument(file: File): Promise<DocumentAnalysisResult> {
   try {

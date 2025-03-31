@@ -26,14 +26,16 @@ const DocumentAnalyzer: React.FC<DocumentAnalyzerProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = Array.from(e.target.files || []);
-    setFiles(selectedFiles);
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFiles = Array.from(e.target.files);
+      setFiles(prev => [...prev, ...selectedFiles]);
+    }
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const droppedFiles = Array.from(e.dataTransfer.files);
-    setFiles(droppedFiles);
+    setFiles(prev => [...prev, ...droppedFiles]);
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -128,6 +130,16 @@ const DocumentAnalyzer: React.FC<DocumentAnalyzerProps> = ({
                 </li>
               ))}
             </ul>
+            <div className="flex justify-center mt-4">
+              <Button 
+                variant="outline" 
+                className="cursor-pointer"
+                onClick={triggerFileInput}
+              >
+                <Upload size={16} className="mr-2" />
+                Add More Files
+              </Button>
+            </div>
           </div>
         ) : (
           <div className="text-center space-y-4">
@@ -141,16 +153,16 @@ const DocumentAnalyzer: React.FC<DocumentAnalyzerProps> = ({
               <Upload size={16} className="mr-2" />
               Select Files
             </Button>
-            <input
-              ref={fileInputRef}
-              id="document-upload"
-              type="file"
-              multiple
-              onChange={handleFileChange}
-              className="hidden"
-            />
           </div>
         )}
+        <input
+          ref={fileInputRef}
+          id="document-upload"
+          type="file"
+          multiple
+          onChange={handleFileChange}
+          className="hidden"
+        />
       </div>
 
       {files.length > 0 && (

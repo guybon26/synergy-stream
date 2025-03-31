@@ -99,6 +99,17 @@ export interface RegulatoryData {
   impact: 'low' | 'medium' | 'high';
 }
 
+export interface FinanceData {
+  siteId: string;
+  category: string;
+  description: string;
+  amount: number;
+  currency: string;
+  date: string;
+  status: 'projected' | 'actual' | 'overbudget';
+  budgetImpact: 'positive' | 'neutral' | 'negative';
+}
+
 export interface ProtocolAnalysisResult {
   logistics: {
     supplyRequirements: string[];
@@ -155,12 +166,14 @@ export interface DocumentSource {
     logistics?: string[];
     cro?: string[];
     regulatory?: string[];
+    finance?: string[];
   };
   extractedData?: {
     logistics?: LogisticsData[];
     patients?: PatientJourney[];
     enrollment?: EnrollmentData[];
     regulatory?: RegulatoryData[];
+    finance?: FinanceData[];
   };
 }
 
@@ -180,5 +193,6 @@ export interface MultiDocumentAnalysisResult {
     patients: PatientJourney[];
     enrollment: EnrollmentData[];
     regulatory: RegulatoryData[];
+    finance: FinanceData[];
   };
 }

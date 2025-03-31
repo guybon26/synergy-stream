@@ -38,7 +38,8 @@ import {
   DisruptionLogEntry,
   RegulatoryData,
   ProtocolAnalysisResult,
-  RiskAssessment
+  RiskAssessment,
+  MultiDocumentAnalysisResult
 } from '@/types/synergia';
 
 const Index = () => {
@@ -54,6 +55,8 @@ const Index = () => {
   const [regulatoryData, setRegulatoryData] = useState<RegulatoryData[]>([]);
   const [protocolAnalysis, setProtocolAnalysis] = useState<ProtocolAnalysisResult | null>(null);
   const [riskAssessment, setRiskAssessment] = useState<RiskAssessment | null>(null);
+  const [documentAnalysisResult, setDocumentAnalysisResult] = useState<MultiDocumentAnalysisResult | null>(null);
+  const [usingDocumentData, setUsingDocumentData] = useState(false);
   
   const [loadingPatients, setLoadingPatients] = useState(true);
   const [loadingReasoning, setLoadingReasoning] = useState(false);
@@ -140,6 +143,39 @@ const Index = () => {
     setRiskAssessment(assessment);
   };
 
+  const handleDocumentAnalysisComplete = (result: MultiDocumentAnalysisResult) => {
+    console.log("Document analysis complete with data:", result);
+    setDocumentAnalysisResult(result);
+    
+    // Use document data if available
+    if (result.extractedData) {
+      if (result.extractedData.logistics && result.extractedData.logistics.length > 0) {
+        setLogisticsData(result.extractedData.logistics);
+        setUsingDocumentData(true);
+      }
+      
+      if (result.extractedData.patients && result.extractedData.patients.length > 0) {
+        setPatients(result.extractedData.patients);
+      }
+      
+      if (result.extractedData.enrollment && result.extractedData.enrollment.length > 0) {
+        setEnrollmentData(result.extractedData.enrollment);
+      }
+      
+      if (result.extractedData.regulatory && result.extractedData.regulatory.length > 0) {
+        setRegulatoryData(result.extractedData.regulatory);
+      }
+    }
+    
+    setProtocolAnalysis(result.protocolAnalysis);
+    setRiskAssessment(result.riskAssessment);
+    
+    // Generate simulation parameters
+    if (result.combinedSimulationParams) {
+      handleSimulateDisruption(result.combinedSimulationParams);
+    }
+  };
+
   const handleDismissAlert = () => {
     setTrigger(null);
   };
@@ -174,7 +210,11 @@ const Index = () => {
               </TabsContent>
               
               <TabsContent value="logistics" className="mt-0">
-                <LogisticsChart data={logisticsData} />
+                <LogisticsChart 
+                  data={logisticsData} 
+                  fromDocuments={usingDocumentData}
+                  title={usingDocumentData ? "Logistics - Document-Extracted Inventory Levels" : "Logistics - Inventory Levels"}
+                />
               </TabsContent>
               
               <TabsContent value="cro" className="mt-0">
@@ -204,6 +244,7 @@ const Index = () => {
               onSimulationGenerated={handleSimulateDisruption}
               onProtocolAnalysisGenerated={handleProtocolAnalysisGenerated}
               onRiskAssessmentGenerated={handleRiskAssessmentGenerated}
+              onAnalysisComplete={handleDocumentAnalysisComplete}
             />
             <DisruptionSimulator onSimulate={handleSimulateDisruption} isLoading={isSimulating} />
             <DisruptionLog entries={disruptionLog} isLoading={loadingLog} />

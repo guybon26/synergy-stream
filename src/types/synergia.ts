@@ -156,6 +156,12 @@ export interface DocumentSource {
     cro?: string[];
     regulatory?: string[];
   };
+  extractedData?: {
+    logistics?: LogisticsData[];
+    patients?: PatientJourney[];
+    enrollment?: EnrollmentData[];
+    regulatory?: RegulatoryData[];
+  };
 }
 
 export interface MultiDocumentAnalysisResult {
@@ -168,5 +174,11 @@ export interface MultiDocumentAnalysisResult {
     products: string[];
     dates: string[];
     procedures: string[];
+  };
+  extractedData?: {
+    logistics: LogisticsData[];
+    patients: PatientJourney[];
+    enrollment: EnrollmentData[];
+    regulatory: RegulatoryData[];
   };
 }

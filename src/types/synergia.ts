@@ -177,6 +177,14 @@ export interface DocumentSource {
   };
 }
 
+export interface AnalysisModelInfo {
+  name: string;
+  version: string;
+  capabilities: string[];
+  accuracyScore: number;
+  lastUpdated: string;
+}
+
 export interface MultiDocumentAnalysisResult {
   combinedSimulationParams: DisruptionSimulationParams;
   protocolAnalysis: ProtocolAnalysisResult;
@@ -195,4 +203,5 @@ export interface MultiDocumentAnalysisResult {
     regulatory: RegulatoryData[];
     finance: FinanceData[];
   };
+  modelInfo: AnalysisModelInfo;
 }

@@ -1,20 +1,37 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AlertTriangle } from 'lucide-react';
-import { DisruptionSimulationParams } from '../types/synergia';
+import { DisruptionSimulationParams, ProtocolAnalysisResult } from '../types/synergia';
 
 interface DisruptionSimulatorProps {
   onSimulate: (params: DisruptionSimulationParams) => void;
   isLoading: boolean;
+  protocolAnalysis?: ProtocolAnalysisResult;
+  simulationParams?: DisruptionSimulationParams;
 }
 
-const DisruptionSimulator = ({ onSimulate, isLoading }: DisruptionSimulatorProps) => {
+const DisruptionSimulator = ({ 
+  onSimulate, 
+  isLoading, 
+  protocolAnalysis,
+  simulationParams 
+}: DisruptionSimulatorProps) => {
   const [params, setParams] = useState<DisruptionSimulationParams>({
     siteId: '002',
     disruptionType: 'IMP Delay',
     severity: 'medium',
     product: 'Drug B'
   });
+
+  // Update parameters when simulation params are provided from document analysis
+  useEffect(() => {
+    if (simulationParams) {
+      setParams(prev => ({
+        ...prev,
+        ...simulationParams
+      }));
+    }
+  }, [simulationParams]);
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -26,11 +43,24 @@ const DisruptionSimulator = ({ onSimulate, isLoading }: DisruptionSimulatorProps
     onSimulate(params);
   };
 
+  // Get storage conditions from protocol analysis
+  const storageConditions = protocolAnalysis?.logistics.storageConditions || "Unknown";
+  const distributionChallenges = protocolAnalysis?.logistics.distributionChallenges || [];
+  const hasProtocolData = !!protocolAnalysis;
+
   return (
     <div className="synergia-card">
-      <div className="mb-4 flex items-center">
-        <AlertTriangle className="text-amber-500 mr-2" size={20} />
-        <h2 className="text-lg font-semibold">Disruption Simulator</h2>
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center">
+          <AlertTriangle className="text-amber-500 mr-2" size={20} />
+          <h2 className="text-lg font-semibold">Disruption Simulator</h2>
+        </div>
+        
+        {hasProtocolData && (
+          <span className="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded-full">
+            Using protocol data
+          </span>
+        )}
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -60,6 +90,9 @@ const DisruptionSimulator = ({ onSimulate, isLoading }: DisruptionSimulatorProps
               <option value="IMP Delay">IMP Delay</option>
               <option value="Site Closure">Site Closure</option>
               <option value="Staff Shortage">Staff Shortage</option>
+              {distributionChallenges.map((challenge, index) => (
+                <option key={index} value={challenge}>{challenge}</option>
+              ))}
             </select>
           </div>
         </div>
@@ -93,6 +126,26 @@ const DisruptionSimulator = ({ onSimulate, isLoading }: DisruptionSimulatorProps
             </select>
           </div>
         </div>
+        
+        {hasProtocolData && (
+          <div className="bg-gray-50 p-3 rounded-md text-sm">
+            <h3 className="font-medium text-gray-700 mb-2">Protocol Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div>
+                <span className="font-medium">Storage conditions:</span> {storageConditions}
+              </div>
+              <div>
+                <span className="font-medium">Complexity:</span> {protocolAnalysis.complexity}/5
+              </div>
+              <div>
+                <span className="font-medium">Visit schedule:</span> {protocolAnalysis.cro.visitSchedule.visitCount} visits over {protocolAnalysis.cro.visitSchedule.durationWeeks} weeks
+              </div>
+              <div>
+                <span className="font-medium">Estimated demand:</span> {protocolAnalysis.logistics.estimatedDemand.estimate}
+              </div>
+            </div>
+          </div>
+        )}
         
         <div className="text-center pt-2">
           <button 

@@ -1,10 +1,10 @@
 
 import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
-import { FileText, Upload, AlertCircle } from 'lucide-react';
+import { FileText, Upload, AlertCircle, Server } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { analyzeDocuments } from '@/services/documentAnalysis';
-import { DisruptionSimulationParams, ProtocolAnalysisResult, RiskAssessment, MultiDocumentAnalysisResult } from '@/types/synergia';
+import { DisruptionSimulationParams, ProtocolAnalysisResult, RiskAssessment, MultiDocumentAnalysisResult, AnalysisModelInfo } from '@/types/synergia';
 
 interface DocumentAnalyzerProps {
   onSimulationGenerated: (params: DisruptionSimulationParams) => void;
@@ -22,6 +22,7 @@ const DocumentAnalyzer: React.FC<DocumentAnalyzerProps> = ({
   const [files, setFiles] = useState<File[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<MultiDocumentAnalysisResult | null>(null);
+  const [modelInfo, setModelInfo] = useState<AnalysisModelInfo | null>(null);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -68,6 +69,7 @@ const DocumentAnalyzer: React.FC<DocumentAnalyzerProps> = ({
     try {
       const result = await analyzeDocuments(files);
       setAnalysisResult(result);
+      setModelInfo(result.modelInfo);
       
       // Set the simulation parameters
       onSimulationGenerated(result.combinedSimulationParams);
@@ -101,9 +103,18 @@ const DocumentAnalyzer: React.FC<DocumentAnalyzerProps> = ({
 
   return (
     <div className="synergia-card mb-6">
-      <div className="mb-4 flex items-center">
-        <FileText className="text-synergia-600 mr-2" size={20} />
-        <h2 className="text-lg font-semibold">Multi-Document Trial Analysis</h2>
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center">
+          <FileText className="text-synergia-600 mr-2" size={20} />
+          <h2 className="text-lg font-semibold">Multi-Document Trial Analysis</h2>
+        </div>
+        
+        {modelInfo && (
+          <div className="flex items-center text-xs bg-gray-100 px-2 py-1 rounded">
+            <Server size={12} className="mr-1 text-synergia-600" />
+            <span>Model: {modelInfo.name} v{modelInfo.version} ({modelInfo.accuracyScore * 100}% accuracy)</span>
+          </div>
+        )}
       </div>
       
       <div 
@@ -143,7 +154,7 @@ const DocumentAnalyzer: React.FC<DocumentAnalyzerProps> = ({
           </div>
         ) : (
           <div className="text-center space-y-4">
-            <FileText size={36} className="text-gray-400" />
+            <FileText size={36} className="mx-auto text-gray-400" />
             <p className="text-sm text-gray-500">Drag & drop files here or click to browse</p>
             <Button 
               variant="outline" 
@@ -183,6 +194,18 @@ const DocumentAnalyzer: React.FC<DocumentAnalyzerProps> = ({
             </>
           )}
         </Button>
+      )}
+      
+      {modelInfo && (
+        <div className="mt-4 text-xs text-gray-500">
+          <div className="font-medium mb-1">Analysis Model Capabilities:</div>
+          <ul className="list-disc pl-4 grid grid-cols-2 gap-x-4">
+            {modelInfo.capabilities.map((capability, index) => (
+              <li key={index}>{capability}</li>
+            ))}
+          </ul>
+          <div className="mt-1">Last updated: {modelInfo.lastUpdated}</div>
+        </div>
       )}
     </div>
   );

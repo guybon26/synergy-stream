@@ -112,7 +112,7 @@ export const analyzeDocuments = async (
   
   // Extract protocol storage conditions from protocol files
   const storageConditions = sources.some(source => 
-    containsProtocolData(source.fileName.toLowerCase())) 
+    containsProtocolData(source.fileName)) 
     ? "2-8°C (Refrigerated)" 
     : "15-25°C (Room temperature)";
   

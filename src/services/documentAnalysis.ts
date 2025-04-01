@@ -30,8 +30,12 @@ const containsFinanceData = (file: File): boolean => {
 };
 
 // Helper function to check if file might contain protocol data
-const containsProtocolData = (file: File): boolean => {
-  const fileName = file.name.toLowerCase();
+// Modified to accept either a File object or a string filename
+const containsProtocolData = (fileOrName: File | string): boolean => {
+  const fileName = typeof fileOrName === 'string' 
+    ? fileOrName.toLowerCase() 
+    : fileOrName.name.toLowerCase();
+    
   return fileName.includes('protocol') || 
          fileName.includes('study') || 
          fileName.includes('clinical') || 

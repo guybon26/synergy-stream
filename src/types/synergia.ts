@@ -1,4 +1,3 @@
-
 export interface TriggerResponse {
   triggerId: string;
   message: string;
@@ -59,6 +58,12 @@ export interface LogisticsData {
   inventory: number;
   reorderPoint: number;
   status: 'ok' | 'warning' | 'critical';
+  shipmentFrequency?: string;
+  transportationType?: string;
+  storageType?: string;
+  temperatureRequirements?: string;
+  handlingInstructions?: string;
+  leadTime?: number;
 }
 
 export interface EnrollmentData {
@@ -97,6 +102,10 @@ export interface RegulatoryData {
   dueDate: string;
   description: string;
   impact: 'low' | 'medium' | 'high';
+  importerOfRecord?: string;
+  customsRequirements?: string[];
+  localRepresentative?: string;
+  submissionTimeline?: string;
 }
 
 export interface FinanceData {
@@ -119,6 +128,10 @@ export interface ProtocolAnalysisResult {
       high: boolean;
       estimate: string;
     };
+    shippingFrequency?: string;
+    temperatureMonitoring?: string;
+    packagingRequirements?: string[];
+    importRequirements?: string[];
   };
   cro: {
     visitSchedule: {
@@ -132,9 +145,20 @@ export interface ProtocolAnalysisResult {
       complexity: number;
     };
     patientBurden: number;
+    monitoringFrequency?: string;
+    dataManagement?: {
+      complexity: number;
+      electronicSystems: string[];
+    };
+    recruitmentStrategy?: string[];
   };
   protocolChallenges: string[];
   complexity: number;
+  siteSpecificRequirements?: Record<string, {
+    regulatoryNotes: string[];
+    logisticsNotes: string[];
+    staffingNotes: string[];
+  }>;
 }
 
 export interface Risk {
@@ -195,6 +219,8 @@ export interface MultiDocumentAnalysisResult {
     products: string[];
     dates: string[];
     procedures: string[];
+    regulatoryBodies?: string[];
+    countries?: string[];
   };
   extractedData?: {
     logistics: LogisticsData[];
@@ -204,4 +230,25 @@ export interface MultiDocumentAnalysisResult {
     finance: FinanceData[];
   };
   modelInfo: AnalysisModelInfo;
+  tabAnalysis?: {
+    logistics: {
+      summary: string;
+      keyFindings: string[];
+      recommendations: string[];
+    };
+    cro: {
+      summary: string;
+      keyFindings: string[];
+      recommendations: string[];
+    };
+    regulatory: {
+      summary: string;
+      keyFindings: string[];
+      recommendations: string[];
+    };
+    locations: {
+      summary: string;
+      siteNotes: Record<string, string[]>;
+    };
+  };
 }

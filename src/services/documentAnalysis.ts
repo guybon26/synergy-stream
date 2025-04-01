@@ -1,4 +1,3 @@
-
 import {
   DisruptionSimulationParams,
   MultiDocumentAnalysisResult,
@@ -8,10 +7,10 @@ import {
   LogisticsData,
   FinanceData,
   AnalysisModelInfo,
-  EnrollmentData
+  EnrollmentData,
+  RegulatoryData
 } from '@/types/synergia';
 
-// Helper function to determine file type
 const determineFileType = (file: File): DocumentSource['fileType'] => {
   const fileName = file.name.toLowerCase();
   if (fileName.endsWith('.pdf')) return 'pdf';
@@ -20,7 +19,6 @@ const determineFileType = (file: File): DocumentSource['fileType'] => {
   return 'unknown';
 };
 
-// Helper function to check if file might contain finance data
 const containsFinanceData = (file: File): boolean => {
   const fileName = file.name.toLowerCase();
   return fileName.includes('finance') || 
@@ -29,8 +27,6 @@ const containsFinanceData = (file: File): boolean => {
          fileName.includes('expense');
 };
 
-// Helper function to check if file might contain protocol data
-// Modified to accept either a File object or a string filename
 const containsProtocolData = (fileOrName: File | string): boolean => {
   const fileName = typeof fileOrName === 'string' 
     ? fileOrName.toLowerCase() 
@@ -42,50 +38,44 @@ const containsProtocolData = (fileOrName: File | string): boolean => {
          fileName.includes('trial');
 };
 
-// Update the analyzeDocuments function to extract logistics data from files
 export const analyzeDocuments = async (
   files: File[]
 ): Promise<MultiDocumentAnalysisResult> => {
-  // Simulate processing delay
   await new Promise(resolve => setTimeout(resolve, 2000));
   
-  // In a real implementation, this would process the files and extract data
   console.log(`Processing ${files.length} files for analysis`);
   
-  // Generate mock document sources based on uploaded files
   const sources: DocumentSource[] = files.map(file => {
     const fileType = determineFileType(file);
     const isFinanceFile = containsFinanceData(file);
     const isProtocolFile = containsProtocolData(file);
     
-    // Generate finance data if file seems finance-related
     const financeData = isFinanceFile ? generateFinanceData(file) : [];
     
-    // Generate sample extracted data based on file type
     return {
       fileName: file.name,
       fileType,
       fileSize: file.size,
       extractedContent: `Sample extracted content from ${file.name}`,
       sectorInsights: {
-        logistics: ['Inventory levels identified', 'Supply chain requirements detected'],
-        cro: ['Patient enrollment projections found', 'Visit schedule complexity analyzed'],
-        regulatory: ['Regulatory submission deadlines detected'],
+        logistics: ['Inventory levels identified', 'Supply chain requirements detected', 'Temperature monitoring requirements found'],
+        cro: ['Patient enrollment projections found', 'Visit schedule complexity analyzed', 'Monitoring requirements detected'],
+        regulatory: ['Regulatory submission deadlines detected', 'Import/export requirements identified', 'Local representative requirements found'],
         finance: isFinanceFile ? ['Budget allocations identified', 'Cost centers detected'] : []
       },
       extractedData: {
-        // Generate sample extracted logistics data from file
-        logistics: generateLogisticsData(file),
-        finance: financeData,
-        enrollment: isProtocolFile ? generateEnrollmentData(file) : []
+        logistics: generateEnhancedLogisticsData(file),
+        finance,
+        enrollment: isProtocolFile ? generateEnrollmentData(file) : [],
+        regulatory: isProtocolFile ? generateRegulatoryData(file) : []
       }
     };
   });
   
-  // Combine logistics data from all sources
   const extractedLogistics: LogisticsData[] = [];
   const extractedFinance: FinanceData[] = [];
   const extractedEnrollment: EnrollmentData[] = [];
+  const extractedRegulatory: RegulatoryData[] = [];
   
   sources.forEach(source => {
     if (source.extractedData?.logistics) {
@@ -97,9 +87,11 @@ export const analyzeDocuments = async (
     if (source.extractedData?.enrollment) {
       extractedEnrollment.push(...source.extractedData.enrollment);
     }
+    if (source.extractedData?.regulatory) {
+      extractedRegulatory.push(...source.extractedData.regulatory);
+    }
   });
   
-  // Generate model information
   const modelInfo: AnalysisModelInfo = {
     name: "SYNERGIA NLP Analyzer",
     version: "2.1.3",
@@ -108,19 +100,20 @@ export const analyzeDocuments = async (
       "Clinical trial terminology analysis",
       "Protocol risk assessment",
       "Supply chain disruption prediction",
-      "Financial impact analysis"
+      "Financial impact analysis",
+      "Regulatory compliance analysis",
+      "Site logistics evaluation",
+      "Interactive Q&A on trial data"
     ],
     accuracyScore: 0.89,
     lastUpdated: "2023-10-15"
   };
   
-  // Extract protocol storage conditions from protocol files
   const storageConditions = sources.some(source => 
     containsProtocolData(source.fileName)) 
     ? "2-8°C (Refrigerated)" 
     : "15-25°C (Room temperature)";
   
-  // Generate combined simulation parameters from all files
   const combinedSimulationParams: DisruptionSimulationParams = {
     siteId: extractedLogistics.length > 0 ? extractedLogistics[0].siteId : 'SITE001',
     disruptionType: 'IMP Delay',
@@ -128,18 +121,21 @@ export const analyzeDocuments = async (
     product: extractedLogistics.length > 0 ? extractedLogistics[0].product : 'Drug A'
   };
   
-  // Generate protocol analysis based on actual uploaded files
   const protocolAnalysis: ProtocolAnalysisResult = {
     logistics: {
-      supplyRequirements: ['Refrigerated storage', 'Temperature monitoring'],
+      supplyRequirements: ['Refrigerated storage', 'Temperature monitoring', 'Controlled shipment'],
       storageConditions,
-      distributionChallenges: ['Cold chain logistics', 'Customs clearance'],
+      distributionChallenges: ['Cold chain logistics', 'Customs clearance', 'Local distribution restrictions'],
       estimatedDemand: {
         high: extractedLogistics.some(item => item.inventory > 50),
         estimate: extractedLogistics.length > 0 
           ? `${Math.round(extractedLogistics.reduce((sum, item) => sum + item.inventory, 0) / extractedLogistics.length * 10)} units per month`
           : '1000 units per month'
-      }
+      },
+      shippingFrequency: "Bi-weekly",
+      temperatureMonitoring: "Continuous electronic monitoring required",
+      packagingRequirements: ["Triple layer insulation", "Temperature indicators", "Shock-resistant outer packaging"],
+      importRequirements: ["Import licenses required for EU, Asia", "Customs documentation", "Local representative"]
     },
     cro: {
       visitSchedule: {
@@ -149,16 +145,33 @@ export const analyzeDocuments = async (
       },
       procedureComplexity: 4,
       staffingRequirements: {
-        staff: ['Physician', 'Nurse', 'Technician'],
+        staff: ['Physician', 'Nurse', 'Technician', 'Clinical Research Associate', 'Data Manager'],
         complexity: 3
       },
-      patientBurden: 3
+      patientBurden: 3,
+      monitoringFrequency: "Bi-weekly remote, monthly on-site",
+      dataManagement: {
+        complexity: 4,
+        electronicSystems: ["EDC", "ePRO", "CTMS", "RTSM"]
+      },
+      recruitmentStrategy: ["Patient advocacy groups", "Digital advertising", "Physician referrals"]
     },
-    protocolChallenges: ['Complex inclusion/exclusion criteria', 'Extensive data collection'],
-    complexity: 4
+    protocolChallenges: ['Complex inclusion/exclusion criteria', 'Extensive data collection', 'Multiple product administrations'],
+    complexity: 4,
+    siteSpecificRequirements: {
+      'SITE001': {
+        regulatoryNotes: ["IRB approval expedited", "Local ethics review required"],
+        logisticsNotes: ["Direct-to-site shipping approved", "Backup storage facility required"],
+        staffingNotes: ["Additional pharmacy staff needed", "24/7 on-call physician required"]
+      },
+      'SITE002': {
+        regulatoryNotes: ["Full FDA submission required", "Import permits pending"],
+        logisticsNotes: ["Temperature excursions reported in summer", "Alternative courier needed"],
+        staffingNotes: ["Staff shortage identified", "Remote monitoring limitations"]
+      }
+    }
   };
   
-  // Generate risk assessment based on actual data from files
   const riskAssessment: RiskAssessment = {
     logistics: [
       {
@@ -180,6 +193,14 @@ export const analyzeDocuments = async (
             : 'low',
         impact: 'Study delay',
         mitigation: 'Establish backup supply'
+      },
+      {
+        category: 'Temperature Control',
+        description: 'Risk of temperature excursions during transit',
+        severity: 'high',
+        probability: 'medium',
+        impact: 'Product degradation and patient safety',
+        mitigation: 'Implement continuous temperature monitoring and alert system'
       }
     ],
     cro: [
@@ -190,6 +211,14 @@ export const analyzeDocuments = async (
         probability: 'medium',
         impact: 'Study timeline extension',
         mitigation: 'Increase site activation'
+      },
+      {
+        category: 'Data Quality',
+        description: 'Risk of incomplete or inaccurate data collection',
+        severity: 'medium',
+        probability: 'low',
+        impact: 'Regulatory submissions and analysis',
+        mitigation: 'Implement additional data validation steps and site training'
       }
     ],
     regulatory: [
@@ -200,21 +229,114 @@ export const analyzeDocuments = async (
         probability: 'low',
         impact: 'Regulatory action',
         mitigation: 'Enhance training and monitoring'
+      },
+      {
+        category: 'Import/Export',
+        description: 'Customs delays for international sites',
+        severity: 'medium',
+        probability: 'high',
+        impact: 'Site activation and supply chain',
+        mitigation: 'Engage local customs brokers and prepare documentation in advance'
       }
     ],
     overall: {
       riskScore: 65,
       summary: 'Moderate risk profile identified',
-      mitigationStrategies: ['Implement risk mitigation plan', 'Monitor key risk indicators']
+      mitigationStrategies: [
+        'Implement risk mitigation plan', 
+        'Monitor key risk indicators',
+        'Establish backup suppliers for critical components',
+        'Develop contingency plans for potential site closures',
+        'Increase monitoring frequency for high-risk sites'
+      ]
     }
   };
   
-  // Extract keywords from files
   const keywords = {
     sites: extractedLogistics.map(item => item.siteId).filter((v, i, a) => a.indexOf(v) === i),
     products: extractedLogistics.map(item => item.product).filter((v, i, a) => a.indexOf(v) === i),
     dates: ['2023-06-15', '2023-08-30', '2023-12-01'],
-    procedures: ['Blood Draw', 'ECG', 'MRI', 'Physical Exam']
+    procedures: ['Blood Draw', 'ECG', 'MRI', 'Physical Exam'],
+    regulatoryBodies: ['FDA', 'EMA', 'PMDA', 'ANVISA', 'Health Canada'],
+    countries: ['United States', 'Canada', 'Brazil', 'United Kingdom', 'Germany', 'Japan', 'Australia']
+  };
+  
+  const tabAnalysis = {
+    logistics: {
+      summary: "The trial requires refrigerated storage (2-8°C) for all products with continuous temperature monitoring. Bi-weekly shipments are recommended with triple-layer insulation packaging.",
+      keyFindings: [
+        "Temperature excursions identified as high-risk factor",
+        "International shipping requires import licenses and customs documentation",
+        "Site SITE002 has reported temperature control issues",
+        "Backup suppliers needed for critical components"
+      ],
+      recommendations: [
+        "Implement continuous temperature monitoring system",
+        "Establish backup supply chain for all critical materials",
+        "Increase inventory levels at sites with historical supply issues",
+        "Develop contingency plans for cold chain failures"
+      ]
+    },
+    cro: {
+      summary: "The protocol requires 12 patient visits over 48 weeks with moderate complexity procedures. Staff requirements include physicians, nurses, and technicians with specialized training.",
+      keyFindings: [
+        "Patient recruitment projected to be challenging",
+        "Data collection complexity rated as high (4/5)",
+        "Staff shortages identified at Site SITE002",
+        "Remote monitoring limitations at some sites"
+      ],
+      recommendations: [
+        "Increase site support for patient recruitment",
+        "Simplify data collection procedures where possible",
+        "Provide additional training for site staff",
+        "Implement enhanced monitoring for sites with identified issues"
+      ]
+    },
+    regulatory: {
+      summary: "Multiple regulatory bodies involved with varying submission requirements. Import permits required for international sites with local representatives needed in some regions.",
+      keyFindings: [
+        "FDA and EMA submissions require different documentation",
+        "Import permits pending for some international sites",
+        "Local ethics committee approval variations by country",
+        "Customs clearance identified as potential delay factor"
+      ],
+      recommendations: [
+        "Engage local regulatory consultants in each region",
+        "Prepare customs documentation well in advance",
+        "Establish communication channel with regulatory authorities",
+        "Develop timeline tracking system for all regulatory submissions"
+      ]
+    },
+    locations: {
+      summary: "The trial includes sites across 7 countries with varying regulatory, logistics, and staffing requirements. Site-specific challenges have been identified and documented.",
+      siteNotes: {
+        "SITE001": [
+          "Northeast Medical Center with expedited IRB approval",
+          "Direct-to-site shipping approved",
+          "Additional pharmacy staff needed"
+        ],
+        "SITE002": [
+          "Pacific Research Institute with temperature control issues",
+          "Full FDA submission required",
+          "Staff shortage identified"
+        ],
+        "SITE003": [
+          "Midwest Clinical Center with good enrollment performance",
+          "Temperature monitoring system in place",
+          "Adequate staffing levels"
+        ],
+        "SITE004": [
+          "Southern Medical Research with customs clearance challenges",
+          "Local representative required",
+          "Remote monitoring capabilities limited"
+        ],
+        "SITE005": [
+          "Capital Region Hospital with strong regulatory compliance",
+          "Backup storage facility available",
+          "24/7 on-call physician available"
+        ]
+      }
+    }
   };
   
   return {
@@ -227,48 +349,65 @@ export const analyzeDocuments = async (
       logistics: extractedLogistics,
       finance: extractedFinance,
       enrollment: extractedEnrollment,
-      patients: [], // We could generate mock patient data here
-      regulatory: []  // We could generate mock regulatory data here
+      patients: [],
+      regulatory: extractedRegulatory
     },
-    modelInfo
+    modelInfo,
+    tabAnalysis
   };
 };
 
-// Helper function to generate logistics data from a file
-function generateLogisticsData(file: File): LogisticsData[] {
-  // Extract product name from filename if possible
+function generateEnhancedLogisticsData(file: File): LogisticsData[] {
   const fileName = file.name;
   const productMatch = fileName.match(/([A-Za-z]+\d*)/);
   const productBase = productMatch ? productMatch[0] : 'Drug';
   
-  // Generate between 2-4 products
   const numProducts = Math.floor(Math.random() * 3) + 2;
   const result: LogisticsData[] = [];
   
+  const storageTypes = ['Refrigerated', 'Frozen', 'Controlled Room Temperature', 'Ultra-cold'];
+  const tempRequirements = ['2-8°C', '-20°C', '15-25°C', '-70°C'];
+  const transportTypes = ['Air Freight', 'Temperature-controlled Vehicle', 'Express Courier', 'Maritime Shipping'];
+  const frequencies = ['Weekly', 'Bi-weekly', 'Monthly', 'On-demand'];
+  
   for (let i = 0; i < numProducts; i++) {
-    const product = `${productBase} ${String.fromCharCode(65 + i)}`; // Drug A, Drug B, etc.
+    const product = `${productBase} ${String.fromCharCode(65 + i)}`;
     const inventory = Math.floor(Math.random() * 100) + 10;
     const reorderPoint = Math.floor(inventory * 0.6);
     const status = inventory > reorderPoint ? 'ok' : (inventory > reorderPoint * 0.5 ? 'warning' : 'critical');
+    
+    const fileNameLower = fileName.toLowerCase();
+    let storageTypeIndex = 0;
+    if (fileNameLower.includes('frozen') || fileNameLower.includes('cold')) {
+      storageTypeIndex = 1;
+    } else if (fileNameLower.includes('room') || fileNameLower.includes('ambient')) {
+      storageTypeIndex = 2;
+    } else if (fileNameLower.includes('ultra') || fileNameLower.includes('-70')) {
+      storageTypeIndex = 3;
+    }
     
     result.push({
       siteId: `SITE00${i + 1}`,
       product,
       inventory,
       reorderPoint,
-      status
+      status,
+      shipmentFrequency: frequencies[Math.floor(Math.random() * frequencies.length)],
+      transportationType: transportTypes[Math.floor(Math.random() * transportTypes.length)],
+      storageType: storageTypes[storageTypeIndex],
+      temperatureRequirements: tempRequirements[storageTypeIndex],
+      handlingInstructions: "Handle with care. Keep upright. Protect from light.",
+      leadTime: Math.floor(Math.random() * 14) + 7
     });
   }
   
   return result;
 }
 
-// Helper function to generate finance data from a file
 function generateFinanceData(file: File): FinanceData[] {
   const categories = ['Personnel', 'Equipment', 'Medication', 'Patient Compensation', 'Site Costs', 'Regulatory Fees'];
   const result: FinanceData[] = [];
   
-  // Use parts of the filename to seed the data
   const fileName = file.name.toLowerCase();
   const hasOverbudget = fileName.includes('risk') || fileName.includes('issue');
   
@@ -278,7 +417,6 @@ function generateFinanceData(file: File): FinanceData[] {
     const variance = baseAmount * 0.3 * (Math.random() - 0.5);
     const amount = Math.round(baseAmount + variance);
     
-    // Determine status based on filename hints
     let status: 'projected' | 'actual' | 'overbudget' = 'projected';
     if (fileName.includes('actual') || fileName.includes('report')) {
       status = 'actual';
@@ -287,7 +425,6 @@ function generateFinanceData(file: File): FinanceData[] {
       status = 'overbudget';
     }
     
-    // Determine budget impact
     const budgetImpact = status === 'overbudget' ? 'negative' : 
                         (Math.random() > 0.7 ? 'positive' : 'neutral');
     
@@ -306,17 +443,14 @@ function generateFinanceData(file: File): FinanceData[] {
   return result;
 }
 
-// Helper function to generate enrollment data from a file
 function generateEnrollmentData(file: File): EnrollmentData[] {
   const result: EnrollmentData[] = [];
   
-  // Generate data for 3 sites
   for (let i = 1; i <= 3; i++) {
-    const target = Math.floor(Math.random() * 30) + 30; // 30-60
-    const actual = Math.floor(Math.random() * target); // 0-target
-    const rate = parseFloat((Math.random() * 3 + 1).toFixed(1)); // 1.0-4.0
+    const target = Math.floor(Math.random() * 30) + 30;
+    const actual = Math.floor(Math.random() * target);
+    const rate = parseFloat((Math.random() * 3 + 1).toFixed(1));
     
-    // Calculate predicted end date based on enrollment rate
     const remaining = target - actual;
     const weeksRemaining = Math.ceil(remaining / rate);
     const predictedEnd = new Date();
@@ -328,6 +462,81 @@ function generateEnrollmentData(file: File): EnrollmentData[] {
       actual,
       rate,
       predictedEnd: predictedEnd.toISOString().split('T')[0]
+    });
+  }
+  
+  return result;
+}
+
+function generateRegulatoryData(file: File): RegulatoryData[] {
+  const regulatoryBodies = ['FDA', 'EMA', 'PMDA', 'ANVISA', 'Health Canada'];
+  const countries = ['United States', 'European Union', 'Japan', 'Brazil', 'Canada'];
+  const regions = ['North America', 'Europe', 'Asia', 'South America', 'Global'];
+  const requirementTypes: ('documentation' | 'approval' | 'inspection' | 'reporting')[] = ['documentation', 'approval', 'inspection', 'reporting'];
+  const stages: ('screening' | 'enrollment' | 'treatment' | 'follow-up' | 'close-out')[] = ['screening', 'enrollment', 'treatment', 'follow-up', 'close-out'];
+  const statuses: ('compliant' | 'at-risk' | 'non-compliant' | 'pending')[] = ['compliant', 'at-risk', 'non-compliant', 'pending'];
+  const impacts: ('low' | 'medium' | 'high')[] = ['low', 'medium', 'high'];
+  
+  const result: RegulatoryData[] = [];
+  
+  const numRequirements = Math.floor(Math.random() * 4) + 5;
+  
+  for (let i = 0; i < numRequirements; i++) {
+    const countryIndex = i % countries.length;
+    
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + Math.floor(Math.random() * 180) + 30);
+    
+    const requirementType = requirementTypes[Math.floor(Math.random() * requirementTypes.length)];
+    let description = '';
+    
+    switch (requirementType) {
+      case 'documentation':
+        description = `${["Protocol", "IB", "ICF", "CRF", "IND"][Math.floor(Math.random() * 5)]} submission for ${countries[countryIndex]}`;
+        break;
+      case 'approval':
+        description = `${["Regulatory", "Ethics", "Site", "Protocol Amendment"][Math.floor(Math.random() * 4)]} approval required for ${countries[countryIndex]}`;
+        break;
+      case 'inspection':
+        description = `${["Site", "Manufacturing", "Sponsor", "CRO"][Math.floor(Math.random() * 4)]} inspection scheduled in ${countries[countryIndex]}`;
+        break;
+      case 'reporting':
+        description = `${["Safety", "Annual", "Interim", "Final"][Math.floor(Math.random() * 4)]} report submission required`;
+        break;
+    }
+    
+    const customsRequirements = [];
+    if (countries[countryIndex] !== 'United States') {
+      customsRequirements.push('Import license required');
+      customsRequirements.push('Commercial invoice required');
+      
+      if (countries[countryIndex] === 'Brazil' || countries[countryIndex] === 'Japan') {
+        customsRequirements.push('Product registration required');
+        customsRequirements.push('Import permit per shipment required');
+      }
+      
+      if (countries[countryIndex] === 'European Union') {
+        customsRequirements.push('EU customs declaration form required');
+        customsRequirements.push('GDP compliance documentation required');
+      }
+    }
+    
+    result.push({
+      id: `REG${String(i + 1).padStart(3, '0')}`,
+      siteId: `SITE00${Math.floor(Math.random() * 5) + 1}`,
+      country: countries[countryIndex],
+      region: regions[countryIndex],
+      regulatoryBody: regulatoryBodies[countryIndex],
+      requirementType,
+      stage: stages[Math.floor(Math.random() * stages.length)],
+      status: statuses[Math.floor(Math.random() * statuses.length)],
+      dueDate: dueDate.toISOString().split('T')[0],
+      description,
+      impact: impacts[Math.floor(Math.random() * impacts.length)],
+      importerOfRecord: countries[countryIndex] !== 'United States' ? 'Global Clinical Logistics Partner' : undefined,
+      customsRequirements: customsRequirements.length > 0 ? customsRequirements : undefined,
+      localRepresentative: countries[countryIndex] !== 'United States' ? `${countries[countryIndex]} Regulatory Services LLC` : undefined,
+      submissionTimeline: `${Math.floor(Math.random() * 30) + 30} days prior to ${stages[Math.floor(Math.random() * stages.length)]}`
     });
   }
   

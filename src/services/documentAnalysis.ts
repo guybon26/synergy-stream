@@ -65,7 +65,7 @@ export const analyzeDocuments = async (
       },
       extractedData: {
         logistics: generateEnhancedLogisticsData(file),
-        finance,
+        finance: financeData,
         enrollment: isProtocolFile ? generateEnrollmentData(file) : [],
         regulatory: isProtocolFile ? generateRegulatoryData(file) : []
       }

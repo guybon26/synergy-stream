@@ -1,7 +1,7 @@
 
 import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
-import { FileText, Upload, AlertCircle } from 'lucide-react';
+import { FileText, Upload, AlertCircle, PlusCircle } from 'lucide-react';
 import { analyzePDF } from '@/services/pdfAnalysis';
 import { useToast } from '@/hooks/use-toast';
 import { DisruptionSimulationParams } from '@/types/synergia';
@@ -14,13 +14,16 @@ const PDFAnalyzer: React.FC<PDFAnalyzerProps> = ({ onSimulationGenerated }) => {
   const [file, setFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [extractedText, setExtractedText] = useState<string>('');
+  const [hasAnalyzed, setHasAnalyzed] = useState(false);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
-      setExtractedText('');
+      if (hasAnalyzed) {
+        setExtractedText('');
+      }
     }
   };
 
@@ -55,6 +58,7 @@ const PDFAnalyzer: React.FC<PDFAnalyzerProps> = ({ onSimulationGenerated }) => {
       
       // Pass the simulation parameters to the parent component
       onSimulationGenerated(simulationParams);
+      setHasAnalyzed(true);
     } catch (error) {
       console.error("PDF analysis error:", error);
       toast({
@@ -83,7 +87,13 @@ const PDFAnalyzer: React.FC<PDFAnalyzerProps> = ({ onSimulationGenerated }) => {
               <p className="text-sm text-gray-500">{Math.round(file.size / 1024)} KB</p>
               <Button 
                 variant="outline" 
-                onClick={() => setFile(null)}
+                onClick={() => {
+                  setFile(null);
+                  if (hasAnalyzed) {
+                    setExtractedText('');
+                    setHasAnalyzed(false);
+                  }
+                }}
                 className="mt-2"
               >
                 Remove
@@ -117,12 +127,17 @@ const PDFAnalyzer: React.FC<PDFAnalyzerProps> = ({ onSimulationGenerated }) => {
           <Button 
             onClick={handleUpload}
             disabled={isAnalyzing}
-            className="w-full bg-synergia-600 hover:bg-synergia-700"
+            className={`w-full ${hasAnalyzed ? 'bg-synergia-500 hover:bg-synergia-600' : 'bg-synergia-600 hover:bg-synergia-700'}`}
           >
             {isAnalyzing ? (
               <>
                 <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
                 Analyzing...
+              </>
+            ) : hasAnalyzed ? (
+              <>
+                <PlusCircle size={16} className="mr-2" />
+                Analyze Additional Protocol
               </>
             ) : (
               <>

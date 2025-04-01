@@ -1,7 +1,7 @@
 
 import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
-import { FileText, Upload, AlertCircle, Server, MessageSquareText } from 'lucide-react';
+import { FileText, Upload, AlertCircle, Server, MessageSquareText, PlusCircle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { analyzeDocuments } from '@/services/documentAnalysis';
 import { DisruptionSimulationParams, ProtocolAnalysisResult, RiskAssessment, MultiDocumentAnalysisResult, AnalysisModelInfo } from '@/types/synergia';
@@ -121,6 +121,93 @@ const DocumentAnalyzer: React.FC<DocumentAnalyzerProps> = ({
       toast({
         title: "Analysis Failed",
         description: "Could not analyze the documents. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const handleAddMoreFiles = async () => {
+    if (files.length === 0) {
+      toast({
+        title: "No files selected",
+        description: "Please select at least one file to analyze",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      const result = await analyzeDocuments(files);
+      setAnalysisResult(prev => {
+        // Merge the previous and new analysis results
+        if (!prev) return result;
+        
+        return {
+          ...result,
+          sources: [...prev.sources, ...result.sources],
+          keywords: {
+            sites: [...new Set([...prev.keywords.sites, ...result.keywords.sites])],
+            products: [...new Set([...prev.keywords.products, ...result.keywords.products])],
+            dates: [...new Set([...prev.keywords.dates, ...result.keywords.dates])],
+            procedures: [...new Set([...prev.keywords.procedures, ...result.keywords.procedures])],
+            regulatoryBodies: prev.keywords.regulatoryBodies && result.keywords.regulatoryBodies 
+              ? [...new Set([...prev.keywords.regulatoryBodies, ...result.keywords.regulatoryBodies])]
+              : prev.keywords.regulatoryBodies || result.keywords.regulatoryBodies,
+            countries: prev.keywords.countries && result.keywords.countries 
+              ? [...new Set([...prev.keywords.countries, ...result.keywords.countries])]
+              : prev.keywords.countries || result.keywords.countries,
+          },
+          extractedData: {
+            logistics: [...(prev.extractedData?.logistics || []), ...(result.extractedData?.logistics || [])],
+            patients: [...(prev.extractedData?.patients || []), ...(result.extractedData?.patients || [])],
+            enrollment: [...(prev.extractedData?.enrollment || []), ...(result.extractedData?.enrollment || [])],
+            regulatory: [...(prev.extractedData?.regulatory || []), ...(result.extractedData?.regulatory || [])],
+            finance: [...(prev.extractedData?.finance || []), ...(result.extractedData?.finance || [])],
+          }
+        };
+      });
+      
+      // Notify parent component of complete analysis
+      if (onAnalysisComplete && analysisResult) {
+        const updatedResult = {
+          ...analysisResult,
+          sources: [...analysisResult.sources, ...result.sources],
+          extractedData: {
+            logistics: [...(analysisResult.extractedData?.logistics || []), ...(result.extractedData?.logistics || [])],
+            patients: [...(analysisResult.extractedData?.patients || []), ...(result.extractedData?.patients || [])],
+            enrollment: [...(analysisResult.extractedData?.enrollment || []), ...(result.extractedData?.enrollment || [])],
+            regulatory: [...(analysisResult.extractedData?.regulatory || []), ...(result.extractedData?.regulatory || [])],
+            finance: [...(analysisResult.extractedData?.finance || []), ...(result.extractedData?.finance || [])],
+          }
+        };
+        onAnalysisComplete(updatedResult);
+      }
+
+      // Add message to chat about the additional analysis
+      setChatHistory(prev => [
+        ...prev, 
+        {
+          role: "assistant", 
+          content: `I've analyzed ${files.length} additional document${files.length > 1 ? 's' : ''}. The combined analysis now includes information about ${
+            new Set([...(analysisResult?.keywords.sites || []), ...result.keywords.sites]).size
+          } sites and ${
+            new Set([...(analysisResult?.keywords.products || []), ...result.keywords.products]).size
+          } products.`
+        }
+      ]);
+      
+      toast({
+        title: "Additional Analysis Complete",
+        description: `Successfully analyzed ${files.length} more document${files.length > 1 ? 's' : ''}`,
+      });
+    } catch (error) {
+      console.error("Document analysis error:", error);
+      toast({
+        title: "Analysis Failed",
+        description: "Could not analyze the additional documents. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -258,23 +345,57 @@ const DocumentAnalyzer: React.FC<DocumentAnalyzerProps> = ({
           </div>
           
           {files.length > 0 && (
-            <Button
-              onClick={handleAnalyzeDocuments}
-              disabled={isAnalyzing}
-              className="w-full mt-4 bg-synergia-600 hover:bg-synergia-700"
-            >
-              {isAnalyzing ? (
-                <>
-                  <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
-                  Analyzing...
-                </>
+            <div className="space-y-4 mt-4">
+              {analysisResult ? (
+                <Button
+                  onClick={handleAddMoreFiles}
+                  disabled={isAnalyzing}
+                  className="w-full bg-synergia-500 hover:bg-synergia-600"
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <PlusCircle size={16} className="mr-2" />
+                      Analyze Additional Documents
+                    </>
+                  )}
+                </Button>
               ) : (
-                <>
-                  <AlertCircle size={16} className="mr-2" />
-                  Analyze Documents
-                </>
+                <Button
+                  onClick={handleAnalyzeDocuments}
+                  disabled={isAnalyzing}
+                  className="w-full bg-synergia-600 hover:bg-synergia-700"
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle size={16} className="mr-2" />
+                      Analyze Documents
+                    </>
+                  )}
+                </Button>
               )}
-            </Button>
+            </div>
+          )}
+          
+          {analysisResult && (
+            <div className="mt-4 p-3 bg-gray-50 rounded-md border border-gray-200">
+              <h3 className="text-sm font-medium mb-2">Analysis Summary:</h3>
+              <ul className="text-xs space-y-1 text-gray-700">
+                <li>• Analyzed {analysisResult.sources.length} document(s)</li>
+                <li>• Identified {analysisResult.keywords.sites.length} site(s) and {analysisResult.keywords.products.length} product(s)</li>
+                <li>• Generated {analysisResult.extractedData?.logistics.length || 0} logistics data points</li>
+                <li>• Extracted {analysisResult.extractedData?.regulatory.length || 0} regulatory requirements</li>
+              </ul>
+            </div>
           )}
         </TabsContent>
         
